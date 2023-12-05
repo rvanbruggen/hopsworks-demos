@@ -10,7 +10,7 @@ from typing import List, Union, Optional, Tuple, Dict
 
 def generate_historical_day(date: date, start_date: date, data_list: List[Tuple[date, int, float]]) -> List[Tuple[date, int, float]]:
     """
-    Generates synthetic data for a given day with different price patterns for each ID.
+    Generates synthetic data for a given day with different beervolume patterns for each ID.
 
     Parameters:
     - date (datetime.date): The date for which data should be generated.
@@ -24,38 +24,38 @@ def generate_historical_day(date: date, start_date: date, data_list: List[Tuple[
     num_entries = 5000  # 5000 rows per day
     ids = np.arange(5001)  # IDs from 0 to 5000
 
-    # Calculate smoother price variations with increased range and seasonality
+    # Calculate smoother beervolume variations with increased range and seasonality
     days_since_start = (date - start_date).days
-    price_base = 200 + 30 * np.sin(2 * np.pi * days_since_start / 365)
-    price_variation = (
+    beervolume_base = 200 + 30 * np.sin(2 * np.pi * days_since_start / 365)
+    beervolume_variation = (
         10 * np.sin(2 * np.pi * days_since_start / 30) +
         5 * np.sin(2 * np.pi * days_since_start / 7)  # Weekly pattern
     )
 
-    # Generate a range of prices based on the calculated variations
-    prices = np.linspace(price_base - price_variation, price_base + price_variation, num_entries)
+    # Generate a range of beervolumes based on the calculated variations
+    beervolumes = np.linspace(beervolume_base - beervolume_variation, beervolume_base + beervolume_variation, num_entries)
 
     for _ in range(num_entries):
         # Randomly select an ID from the list of IDs
         selected_id = np.random.choice(ids)
-        # Ensure non-negative prices
-        price = max(prices[_], 0)
+        # Ensure non-negative beervolumes
+        beervolume = max(beervolumes[_], 0)
         # Append the generated data entry to the data list
-        data_list.append((date, selected_id, round(price, 1)))
+        data_list.append((date, selected_id, round(beervolume, 1)))
 
     return data_list
 
 
 def generate_historical_data(start_date: Optional[date] = None, end_date: Optional[date] = None) -> pd.DataFrame:
     """
-    Generates synthetic data for a range of dates with different price patterns for each ID.
+    Generates synthetic data for a range of dates with different beervolume patterns for each ID.
 
     Parameters:
     - start_date (datetime.date, optional): The start date for the data generation. Default is today's date.
     - end_date (datetime.date, optional): The end date for the data generation. Default is today's date.
 
     Returns:
-    - pd.DataFrame: A DataFrame containing the generated data with columns ['date', 'id', 'price'].
+    - pd.DataFrame: A DataFrame containing the generated data with columns ['date', 'id', 'beervolume'].
     """
     if start_date is None:
         start_date = datetime.date.today()
@@ -69,7 +69,7 @@ def generate_historical_data(start_date: Optional[date] = None, end_date: Option
     for date in tqdm(date_range, desc="Generating Data"):
         generate_historical_day(date, start_date, data_list)
     
-    df = pd.DataFrame(data_list, columns=['date', 'id', 'price'])
+    df = pd.DataFrame(data_list, columns=['date', 'id', 'beervolume'])
     
     df.drop_duplicates(inplace=True)
 
@@ -82,22 +82,22 @@ def generate_today() -> pd.DataFrame:
 
     Returns:
         pandas.DataFrame: A DataFrame containing data for the current date, including date,
-                          selected ID, and a random price value.
+                          selected ID, and a random beervolume value.
     """
     num_entries = 5000  # 5000 rows per day
     ids = np.arange(5001)  # IDs from 0 to 5000
     data_list = []
     date = datetime.date.today()
     
-    prices = (
+    beervolumes = (
         200 + np.random.uniform(-50, 50, num_entries)
     )
     
     for entry in range(num_entries):
         selected_id = np.random.choice(ids)
-        data_list.append((date, selected_id, round(prices[entry], 1)))
+        data_list.append((date, selected_id, round(beervolumes[entry], 1)))
         
-    df = pd.DataFrame(data_list, columns=['date', 'id', 'price'])
+    df = pd.DataFrame(data_list, columns=['date', 'id', 'beervolume'])
     
     df.drop_duplicates(inplace=True)
 
@@ -109,19 +109,19 @@ def to_wide_format(data: pd.DataFrame) -> pd.DataFrame:
     Converts a DataFrame with time series data into wide format.
 
     Parameters:
-    - data (pd.DataFrame): The input DataFrame containing time series data with columns ['date', 'id', 'price'].
+    - data (pd.DataFrame): The input DataFrame containing time series data with columns ['date', 'id', 'beervolume'].
 
     Returns:
-    - pd.DataFrame: A DataFrame in wide format with 'date' as the index, 'id' as columns, and 'price' values.
+    - pd.DataFrame: A DataFrame in wide format with 'date' as the index, 'id' as columns, and 'beervolume' values.
     """
     # Convert the 'date' column to datetime type
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
 
-    # Aggregate duplicate entries by taking the mean of prices
-    agg_df = data.groupby(['date', 'id'])['price'].mean().reset_index()
+    # Aggregate duplicate entries by taking the mean of beervolumes
+    agg_df = data.groupby(['date', 'id'])['beervolume'].mean().reset_index()
 
     # Pivot the aggregated DataFrame into wide format
-    pivoted_df = agg_df.pivot_table(index='date', columns='id', values='price', fill_value=None)
+    pivoted_df = agg_df.pivot_table(index='date', columns='id', values='beervolume', fill_value=None)
 
     # Sort the columns in ascending order
     pivoted_df = pivoted_df.sort_index(axis=1)
@@ -138,7 +138,7 @@ def plot_historical_id(ids_to_show: List[int], data: pd.DataFrame) -> go.Figure:
 
     Parameters:
     - ids_to_show (list): A list of IDs for which time series data should be plotted.
-    - data (pd.DataFrame): The DataFrame containing the data to be plotted, with columns ['date', 'id', 'price'].
+    - data (pd.DataFrame): The DataFrame containing the data to be plotted, with columns ['date', 'id', 'beervolume'].
 
     Returns:
     - Figure
@@ -162,10 +162,10 @@ def plot_historical_id(ids_to_show: List[int], data: pd.DataFrame) -> go.Figure:
     fig = px.line(
         filtered_df, 
         x='date', 
-        y='price', 
+        y='beervolume', 
         color='id',
-        title=f'Historical Prices for {ids_to_show} IDs',
-        labels={'date': 'Date', 'price': 'Price'},
+        title=f'Historical beervolumes for {ids_to_show} IDs',
+        labels={'date': 'Date', 'beervolume': 'beervolume'},
         line_group='id',
         color_discrete_map=color_map,
     )
@@ -213,7 +213,7 @@ def plot_prediction_test(
     # Add a trace for training data (blue)
     fig.add_trace(go.Scatter(
         x=train_sorted['date'], 
-        y=train_sorted['price'],
+        y=train_sorted['beervolume'],
         mode='lines',
         name='Training Data',  
         line=dict(color='blue')
@@ -222,7 +222,7 @@ def plot_prediction_test(
     # Add a trace for test data (red)
     fig.add_trace(go.Scatter(
         x=test_sorted['date'], 
-        y=test_sorted['price'],
+        y=test_sorted['beervolume'],
         mode='lines',
         name='Test Data', 
         line=dict(color='green')
@@ -231,10 +231,10 @@ def plot_prediction_test(
     if predictions is not None:
         pred_df = pd.DataFrame()
         pred_df['date'] = test_sorted['date']
-        pred_df['price'] = predictions
+        pred_df['beervolume'] = predictions
         fig.add_trace(go.Scatter(
             x=pred_df['date'], 
-            y=pred_df['price'],
+            y=pred_df['beervolume'],
             mode='lines',
             name='Prediction', 
             line=dict(color='red')
@@ -248,7 +248,7 @@ def plot_prediction_test(
     fig.update_layout(
         title=f'Time Series for the {id_to_show} ID',
         xaxis_title='Date',
-        yaxis_title='Price',
+        yaxis_title='Beervolume',
         legend_title='Data Type'
     )
 
@@ -262,13 +262,13 @@ def plot_prediction(
     predictions: Optional[pd.Series] = None,
 ) -> go.Figure:
     """
-    Display a time series plot for a specific ID, showcasing historical data, real prices, and predicted prices.
+    Display a time series plot for a specific ID, showcasing historical data, real beervolumes, and predicted beervolumes.
 
     Parameters:
     - id_to_show (int): The unique identifier for the data series to be displayed.
     - data (pd.DataFrame): A DataFrame containing time series data.
     - week_ago (str): A string representing a date one week ago (in 'YYYY-MM-DD' format).
-    - predictions (pd.Series or None, optional): Predicted price values for the test data. Default is None.
+    - predictions (pd.Series or None, optional): Predicted beervolume values for the test data. Default is None.
 
     Returns:
     - fig (plotly.graph_objs.Figure): A Plotly figure object containing the generated time series plot.
@@ -289,7 +289,7 @@ def plot_prediction(
     # Add a trace for training data (blue)
     fig.add_trace(go.Scatter(
         x=data_historical['date'], 
-        y=data_historical['price'],
+        y=data_historical['beervolume'],
         mode='lines',
         name='Historical Data',  
         line=dict(color='blue')
@@ -298,21 +298,21 @@ def plot_prediction(
     # Add a trace for test data (red)
     fig.add_trace(go.Scatter(
         x=data_last_week['date'], 
-        y=data_last_week['price'],
+        y=data_last_week['beervolume'],
         mode='lines',
-        name='Real Price', 
+        name='Real beervolume', 
         line=dict(color='green')
     ))
     
     if predictions is not None:
         pred_df = pd.DataFrame()
         pred_df['date'] = data_last_week['date']
-        pred_df['price'] = predictions
+        pred_df['beervolume'] = predictions
         fig.add_trace(go.Scatter(
             x=pred_df['date'], 
-            y=pred_df['price'],
+            y=pred_df['beervolume'],
             mode='lines',
-            name='Predicted Price', 
+            name='Predicted beervolume', 
             line=dict(color='red')
         ))
         
@@ -322,9 +322,9 @@ def plot_prediction(
     
     # Customize plot layout
     fig.update_layout(
-        title=f'Predicted price for the {id_to_show} ID',
+        title=f'Predicted beervolume for the {id_to_show} ID',
         xaxis_title='Date',
-        yaxis_title='Price',
+        yaxis_title='beervolume',
         legend_title='Data Type'
     )
 
