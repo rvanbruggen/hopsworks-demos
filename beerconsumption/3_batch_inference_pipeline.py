@@ -1,11 +1,11 @@
 import streamlit as st
 import hopsworks
 from hsfs.feature import Feature
-from features.price import plot_historical_id, plot_prediction
+from features.beervolume import plot_historical_id, plot_prediction
 import joblib
 from datetime import datetime, timedelta
 
-st.header('📈 🔮Batch Inference Pipeline')
+st.header('📈 🔮Batch Beervolume Inference Pipeline')
 
 @st.cache_resource()
 def get_feature_store():
@@ -20,20 +20,20 @@ def get_feature_store():
 
 @st.cache_resource()
 def get_feature_group():
-    st.write("🪝 Retrieving the Price Feature Group...")
-    price_fg = fs.get_feature_group(
-        name='price',
+    st.write("🪝 Retrieving the Beervolume Feature Group...")
+    beervolume_fg = fs.get_feature_group(
+        name='beervolume',
         version=1,
     )
     st.write("✅ Success!")
 
-    return price_fg
+    return beervolume_fg
 
 @st.cache_resource()
 def get_feature_view():
-    st.write("🪝 Retrieving the Feature View...")
+    st.write("🪝 Retrieving the Beervolume Feature View...")
     feature_view = fs.get_feature_view(
-        name = 'price_fv3',
+        name = 'beervolume_fv3',
         version = 1
     )
     st.write("✅ Success!")
@@ -41,20 +41,20 @@ def get_feature_view():
     return feature_view
 
 project, fs = get_feature_store()
-price_fg = get_feature_group()
+beervolume_fg = get_feature_group()
 feature_view = get_feature_view()
 
 
 @st.cache_data()
-def get_data_from_feature_group(_price_fg):
+def get_data_from_feature_group(_beervolume_fg):
     st.write("🪝 Retrieving Data from Feature Store...")
-    data = price_fg.read()
+    data = beervolume_fg.read()
 
     st.write("✅ Success!")
 
     return data
 
-data = get_data_from_feature_group(price_fg)
+data = get_data_from_feature_group(beervolume_fg)
 
 fig = plot_historical_id([1, 2], data)
 
@@ -63,14 +63,14 @@ st.plotly_chart(fig)
 
 @st.cache_resource()
 def retrieve_model():
-    st.write("⚙️ Retrieving Model from Model Registry...")
+    st.write("⚙️ Retrieving Beervolume Model from Model Registry...")
     mr = project.get_model_registry()
     retrieved_model = mr.get_model(
-        name="xgboost_price_model2",
+        name="xgboost_beervolume_model2",
         version=1,
     )
     saved_model_dir = retrieved_model.download()
-    model = joblib.load(saved_model_dir + "/xgboost_price_model2.pkl")
+    model = joblib.load(saved_model_dir + "/xgboost_beervolume_model2.pkl")
 
     st.write("✅ Success!")
 
@@ -81,7 +81,7 @@ model = retrieve_model()
 
 @st.cache_data()
 def get_batch_last_week():
-    st.write("⚙️ Retrieving Batch Data for the last week...")
+    st.write("⚙️ Retrieving Batch Beervolume Data for the last week...")
     # Get today's date
     today = datetime.today()
 
