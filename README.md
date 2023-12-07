@@ -7,4 +7,4 @@ In this demo we will try to predict the beer volume consumption of a particular 
 2. Training pipeline
 3. Inferencing pipeline
 
-Let's give this a try.
+Given the differences between environments, there is going to be a specific demo for Colab+Hopsworks Serverless, and another demo for Jupyter+Hopsworks Enterprise. 
