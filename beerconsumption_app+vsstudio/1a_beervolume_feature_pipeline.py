@@ -1,5 +1,5 @@
 import hopsworks
-from features.beervolume import generate_today
+from beervolume import generate_today
 import warnings
 warnings.filterwarnings('ignore')
 

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from features.averages import calculate_second_order_features
+from averages import calculate_second_order_features
 import hopsworks
 import warnings
 warnings.filterwarnings('ignore')
@@ -10,7 +10,7 @@ fs = project.get_feature_store()
 
 # Retrieve Averages Feature Group
 beervolume_averages_fg = fs.get_feature_group(
-    name='beervolume averages',
+    name='beervolume_averages',
     version=1,
 )
 # Retrieve Beer Volume Feature Group
