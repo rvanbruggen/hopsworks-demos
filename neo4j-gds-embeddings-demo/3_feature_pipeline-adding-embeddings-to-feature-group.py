@@ -22,7 +22,12 @@ DATABASE = "neo4j"
 # Connecting to Neo4j, getting the embeddings, and putting them into a dataframe
 with GraphDatabase.driver(URI, auth=AUTH) as driver:
     graph_embeddings_df = driver.execute_query(
-        "MATCH (p:Party)-[t:TRANSACTION]->(:Party) return p.partyId as party_id, p.partyType as party_type, p.node2vec as party_graph_embedding, t.tran_timestamp.epochmillis as timestamp",
+        """MATCH (p:Party)-[t:TRANSACTION]->(:Party) 
+            return 
+            p.partyId as party_id, 
+            p.partyType as party_type, 
+            p.node2vec as party_graph_embedding, 
+            datetime(t.tran_timestamp).epochmillis as timestamp""",
         database_="neo4j",
         result_transformer_=neo4j.Result.to_df
     )
@@ -31,6 +36,9 @@ with GraphDatabase.driver(URI, auth=AUTH) as driver:
 # Creating the features
 from hsfs import engine
 features = engine.get_instance().parse_schema_feature_group(graph_embeddings_df)
+for f in features:
+    if f.type == "array<double>" or f.type == "array<float>":
+        f.online_type = "VARBINARY(20000)"
 
 # Creating the feature group in Hopsworks Serverless App
 graph_embeddings_fg = fs.get_or_create_feature_group(name="graph_embeddings",
