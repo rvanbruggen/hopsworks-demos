@@ -1,15 +1,17 @@
 from neo4j import GraphDatabase
+from graphdatascience import GraphDataScience
 
 URI = "bolt://localhost:7687"
 AUTH = ("neo4j", "changeme")
 DATABASE = "neo4j"
-
 
 with GraphDatabase.driver(URI, auth=AUTH) as driver:
     try:
         driver.execute_query("create text index party_id_index for (p:Party) on (p.partyId)", database_=DATABASE)
         driver.execute_query("create text index party_type_index for (p:Party) on (p.partyType)", database_=DATABASE)
         driver.execute_query("create text index transaction_id_index for ()-[r:TRANSACTION]-() ON r.tran_id", database_=DATABASE)
+        driver.execute_query("create range index transaction_timestamp_index for ()-[r:TRANSACTION]-() ON r.tran_timestamp", database_=DATABASE)
+
 
         with driver.session(database=DATABASE) as session:
             result = session.run("""
