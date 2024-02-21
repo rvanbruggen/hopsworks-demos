@@ -1,3 +1,5 @@
+# Adding the Neo4j graph embeddings to the Hopsworks Feature Store as a feature group
+
 # Doing all the imports
 import datetime
 import pandas as pd

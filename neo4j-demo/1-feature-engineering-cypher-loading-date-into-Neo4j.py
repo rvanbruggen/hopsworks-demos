@@ -1,3 +1,6 @@
+# Importing Transaction data into Neo4j 
+# (p1:Party)-[t:TRANSACTION]->(p2:Party)
+
 from neo4j import GraphDatabase
 from graphdatascience import GraphDataScience
 

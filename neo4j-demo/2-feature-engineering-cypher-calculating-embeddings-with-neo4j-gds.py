@@ -1,3 +1,5 @@
+# Using Neo4j's Graph Data Science Library to calculate the Node2Vec embeddings
+
 from neo4j import GraphDatabase
 from graphdatascience import GraphDataScience
 
