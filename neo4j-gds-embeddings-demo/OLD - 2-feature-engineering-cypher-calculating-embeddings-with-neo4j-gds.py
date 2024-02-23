@@ -5,18 +5,18 @@ from graphdatascience import GraphDataScience
 
 URI = "bolt://localhost:7687"
 AUTH = ("neo4j", "changeme")
-DATABASE = "neo4j"
+DATABASE = "neo4j2"
 
 
 with GraphDatabase.driver(URI, auth=AUTH) as driver:
     try:
         gds = GraphDataScience(URI, auth=AUTH)
         
-        # gds.run_cypher(
-        #     """
-        #     CALL gds.graph.drop('transaction_graph') YIELD graphName
-        #     """
-        # )
+        gds.run_cypher(
+            """
+            CALL gds.graph.drop('transaction_graph') YIELD graphName
+            """
+        )
         gds.run_cypher(
         """
         MATCH (p1:Party)-[t:TRANSACTION]->(p2:Party)
